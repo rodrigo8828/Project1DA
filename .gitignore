@@ -1,0 +1,17 @@
+# Build
+build/
+
+# VS Code
+.vscode/
+
+# CLion
+.idea/
+
+# Object files
+*.o
+*.obj
+
+# Executáveis
+*.out
+*.exe
+Project1DA
