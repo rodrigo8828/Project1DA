@@ -7,6 +7,10 @@ class Vertex {
 
     public:
         Vertex(std::string location, int id, std::string code, bool parking);
+        int getId();
+        std::string getLocation();
+        std::string getCode();
+        bool Parking();
     
     private:
         std::string location;
