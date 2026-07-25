@@ -23,7 +23,11 @@ std::string Vertex::getCode() {
 
 bool Vertex::Parking() {
     return parking;
-}      
+}  
+
+void Vertex::addEdge(Edge* edge) {
+    con.push_back(edge);
+}
 
 
 

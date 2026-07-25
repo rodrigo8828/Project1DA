@@ -22,3 +22,4 @@ Vertex* Graph::findVertexByID(int id){
     }
     return nullptr;
 }
+
