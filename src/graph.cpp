@@ -24,10 +24,19 @@ Vertex* Graph::findVertexByID(int id){
     return nullptr;
 }
 
+Vertex* Graph::findVertexByCode(const std::string& code) {
+    for (Vertex* v : vertexSet) {
+        if (v->getCode() == code) {
+            return v;
+        }
+    }
+    return nullptr;
+}
+
 void Graph::addEdge(const std::string& location1,const std::string& location2,int driving,int walking){
 
-    Vertex* source = findVertexByLocation(location1);
-    Vertex* destination = findVertexByLocation(location2);
+    Vertex* source = findVertexByCode(location1);
+    Vertex* destination = findVertexByCode(location2);
 
     if (source == nullptr || destination == nullptr) return;
 
