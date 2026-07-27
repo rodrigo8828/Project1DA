@@ -10,6 +10,7 @@ class Graph {
 
 private:
     std::vector<Vertex*> vertexSet;
+    void resetAlgorithm();
 
 public:
     void addVertex(Vertex* v);
@@ -17,6 +18,7 @@ public:
     Vertex* findVertexByLocation(const std::string& location);
     Vertex* findVertexByID(int id);
     Vertex* findVertexByCode(const std::string& code);
+    const std::vector<Vertex*>& getVertexSet() const;
 
 };
 

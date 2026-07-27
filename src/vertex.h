@@ -16,13 +16,22 @@ class Vertex {
         bool Parking();
         void addEdge(Edge* edge);
         const std::vector<Edge*>& getCon() const; //devolve uma referência, mas quem a recebe não pode alterar o vetor.
-    
+        int getBestDistance() const;
+        void setBestDistance(int distance);
+        Vertex* getPrev() const;
+        void setPrev(Vertex* newPrev);
+        bool isVisited() const;
+        void setVisited(bool visited_);
+
     private:
         std::string location;
         int id;
         std::string code;
         bool parking;
         std::vector<Edge*> con;
+        int bestDistance;
+        Vertex* prev;
+        bool visited;
 
 };
 

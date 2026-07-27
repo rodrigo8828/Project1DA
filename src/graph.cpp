@@ -2,6 +2,8 @@
 #include "vertex.h"
 #include "edge.h"
 
+#include <climits>
+
 void Graph::addVertex(Vertex* v) {
     vertexSet.push_back(v);
 }
@@ -45,5 +47,17 @@ void Graph::addEdge(const std::string& location1,const std::string& location2,in
 
     source->addEdge(edge1);
     destination->addEdge(edge2);
+}
+
+const std::vector<Vertex*>& Graph::getVertexSet() const {
+    return vertexSet;
+}
+
+void Graph::resetAlgorithm() {
+    for (Vertex* v : vertexSet) {
+        v->setBestDistance(INT_MAX);
+        v->setPrev(nullptr);
+        v->setVisited(false);
+    }
 }
 
