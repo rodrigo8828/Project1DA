@@ -11,6 +11,7 @@ class Graph {
 private:
     std::vector<Vertex*> vertexSet;
     void resetAlgorithm();
+    void algorithm (int sourceID);
 
 public:
     void addVertex(Vertex* v);

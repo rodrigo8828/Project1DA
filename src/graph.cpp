@@ -61,3 +61,14 @@ void Graph::resetAlgorithm() {
     }
 }
 
+void Graph::algorithm(int sourceId) {
+    resetAlgorithm();
+
+    Vertex* source = findVertexByID(sourceId);
+    if (source == nullptr) {
+        return;
+    }
+
+    source->setBestDistance(0);
+}
+
