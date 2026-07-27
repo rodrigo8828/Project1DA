@@ -40,8 +40,10 @@ void Graph::addEdge(const std::string& location1,const std::string& location2,in
 
     if (source == nullptr || destination == nullptr) return;
 
-    Edge* edge = new Edge(destination,driving,walking);
+    Edge* edge1 = new Edge(destination,driving,walking);
+    Edge* edge2 = new Edge(source,driving,walking);
 
-    source->addEdge(edge);
+    source->addEdge(edge1);
+    destination->addEdge(edge2);
 }
 

@@ -19,7 +19,7 @@ int main() {
         graph
     );
 
-    Vertex* v = graph.findVertexByCode("PA9908");
+    Vertex* v = graph.findVertexByCode("CH2788");
 
     if (v == nullptr) {
         std::cout << "Vertex nao encontrado!" << std::endl;
