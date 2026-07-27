@@ -29,5 +29,9 @@ void Vertex::addEdge(Edge* edge) {
     con.push_back(edge);
 }
 
+const std::vector<Edge*>& Vertex::getCon() const {
+    return con;
+}
+
 
 

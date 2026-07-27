@@ -2,23 +2,23 @@
 using namespace std;
 
 #include "graph.h"
+#include "edge.h"
 #include "vertex.h"
 
 int main() {
-    Graph graph;
+Graph graph;
 
+Vertex* porto = new Vertex("Porto", 1, "POR", true);
+Vertex* gaia = new Vertex("Gaia", 2, "GAI", false);
 
-Vertex* v1 = new Vertex("Porto", 1, "POR", true);
-Vertex* v2 = new Vertex("Gaia", 2, "GAI", false);
+graph.addVertex(porto);
+graph.addVertex(gaia);
 
-graph.addVertex(v1);
-graph.addVertex(v2);
+graph.addEdge("Porto", "Gaia", 20, 60);
 
-Vertex* result = graph.findVertexByID(100);
-
-if (result != nullptr) {
-    std::cout << result->getLocation() << std::endl;
+for (Edge* e : porto->getCon()) {
+    std::cout << e->getDestination()->getLocation() << std::endl;
+    std::cout << e->getDriving() << std::endl;
+    std::cout << e->getWalking() << std::endl;
 }
-
-    return 0;
 }

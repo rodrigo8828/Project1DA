@@ -7,3 +7,15 @@ Edge::Edge(Vertex* destination, int driving, int walking)
 
 {
 }
+
+Vertex* Edge::getDestination() const {
+    return destination;
+}
+
+int Edge::getDriving() const {
+    return driving;
+}
+
+int Edge::getWalking() const {
+    return walking;
+}

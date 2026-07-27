@@ -16,6 +16,7 @@ public:
     void addEdge(const std::string& location1,const std::string& location2,int driving,int walking);
     Vertex* findVertexByLocation(const std::string& location);
     Vertex* findVertexByID(int id);
+
 };
 
 #endif
