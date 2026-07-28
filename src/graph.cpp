@@ -4,6 +4,7 @@
 
 #include <climits>
 #include <queue>
+#include <algorithm>
 
 void Graph::addVertex(Vertex* v) {
     vertexSet.push_back(v);
@@ -18,7 +19,7 @@ Vertex* Graph::findVertexByLocation(const std::string& location){
     return nullptr;
 }
 
-Vertex* Graph::findVertexByID(int id){
+Vertex* Graph::findVertexByID(int id) const{
     for (Vertex* v : vertexSet){
         if (v->getId() == id){
             return v;
@@ -69,7 +70,11 @@ struct CompareDistance {
     }
 };
 
-void Graph::algorithm(int sourceId) {
+void Graph::algorithm(
+    int sourceId,
+    const std::vector<int>& forbiddenNodes,
+    const std::vector<std::pair<int, int>>& forbiddenSegments)  {
+
     resetAlgorithm();
 
     Vertex* source = findVertexByID(sourceId);
@@ -101,6 +106,37 @@ void Graph::algorithm(int sourceId) {
         for (Edge* edge : currentVertex->getCon()) {
         Vertex* nextVert = edge->getDestination();
 
+        bool isForbiddenNode = false;
+
+        for (int nodeId : forbiddenNodes) {
+            if (nextVert->getId() == nodeId) {
+                isForbiddenNode = true;
+                break;
+            }
+        }
+        if (isForbiddenNode) {
+            continue;
+        }
+        bool isForbiddenSegment = false;
+
+        for (const auto& edge : forbiddenSegments) {
+            bool direction =
+                edge.first == currentVertex->getId() &&
+                edge.second == nextVert->getId();
+
+            bool oppositeDirection =
+                edge.first == nextVert->getId() &&
+                edge.second == currentVertex->getId();
+
+            if (direction || oppositeDirection) {
+                isForbiddenSegment = true;
+                break;
+            }
+        }
+
+        if (isForbiddenSegment) {
+            continue;
+        }
         if (edge->getDriving() == -1) {
         continue;
         }
@@ -118,4 +154,16 @@ void Graph::algorithm(int sourceId) {
         
     }
 }
+
+    std::vector<int> Graph::getPath(int destinationID) const {
+    std::vector<int> path;
+    Vertex* current = findVertexByID(destinationID);
+    if (current == nullptr || current->getBestDistance() == INT_MAX) return path;
+    while (current != nullptr) {
+    path.push_back(current->getId());
+    current = current->getPrev();
+    }
+    std::reverse(path.begin(), path.end());
+    return path;
+    }
 
