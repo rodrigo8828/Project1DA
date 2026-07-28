@@ -3,6 +3,7 @@
 #include "edge.h"
 
 #include <climits>
+#include <queue>
 
 void Graph::addVertex(Vertex* v) {
     vertexSet.push_back(v);
@@ -61,6 +62,13 @@ void Graph::resetAlgorithm() {
     }
 }
 
+struct CompareDistance {
+    bool operator()(const std::pair<int, Vertex*>& a,
+                    const std::pair<int, Vertex*>& b) const {
+        return a.first > b.first;
+    }
+};
+
 void Graph::algorithm(int sourceId) {
     resetAlgorithm();
 
@@ -70,5 +78,44 @@ void Graph::algorithm(int sourceId) {
     }
 
     source->setBestDistance(0);
+
+    std::priority_queue<
+    std::pair<int, Vertex*>,
+    std::vector<std::pair<int, Vertex*>>,
+    CompareDistance
+    > road;
+
+    road.push({0, source});
+
+    while (!road.empty()) {
+        auto current = road.top();
+        road.pop();
+        int currentDistance = current.first;
+        Vertex* currentVertex = current.second;
+        if (currentVertex->isVisited()) {
+        continue;
+        }
+
+        currentVertex->setVisited(true);
+
+        for (Edge* edge : currentVertex->getCon()) {
+        Vertex* nextVert = edge->getDestination();
+
+        if (edge->getDriving() == -1) {
+        continue;
+        }
+        if (nextVert->isVisited()) {
+        continue;
+        }
+        int newDistance = currentDistance + edge->getDriving();
+
+        if (newDistance < nextVert->getBestDistance()) {
+        nextVert->setBestDistance(newDistance);
+        nextVert->setPrev(currentVertex);
+        road.push({newDistance,nextVert});
+        }
+        }
+        
+    }
 }
 
