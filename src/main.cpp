@@ -1,28 +1,39 @@
 #include <iostream>
 #include <vector>
-#include <climits>
 #include <utility>
+#include <climits>
 
 #include "graph.h"
 #include "parser.h"
 #include "vertex.h"
 
 int main() {
+    // 1. Criar o grafo
     Graph graph;
 
+    // 2. Ler os vértices
     Parser::readLocations(
         "../For Students-20250213T135713Z-001/For Students/Locations_small.csv",
         graph
     );
 
+    // 3. Ler as arestas
     Parser::readDistances(
         "../For Students-20250213T135713Z-001/For Students/Distances_small.csv",
         graph
     );
 
-    int sourceId = 8;
-    int destinationId = 1;
+    // 4. Dados do teste
+    int sourceId = 5;
+    int destinationId = 4;
 
+    // Nó que queremos evitar
+    std::vector<int> avoidNodes = {2};
+
+    // Neste teste não evitamos segmentos
+    std::vector<std::pair<int, int>> avoidSegments = {{4,7}};
+
+    // 5. Verificar origem e destino
     Vertex* source = graph.findVertexByID(sourceId);
     Vertex* destination = graph.findVertexByID(destinationId);
 
@@ -36,100 +47,90 @@ int main() {
         return 0;
     }
 
-    // Melhor rota
-    graph.algorithm(sourceId);
-
-    std::vector<int> bestRoute = graph.getPath(destinationId);
-
-    if (bestRoute.empty()) {
-        std::cout << "Output:\n";
-        std::cout << "Fastest Driving Route: none\n";
-        std::cout << "Best alternative independent route: none\n";
-        return 0;
+    // Não faz sentido evitar a origem ou o destino
+    for (int nodeId : avoidNodes) {
+        if (nodeId == sourceId || nodeId == destinationId) {
+            std::cout << "RestrictedDrivingRoute:none\n";
+            return 0;
+        }
     }
 
-    int bestTime = destination->getBestDistance();
-
-    // Criar restricoes automaticamente a partir da melhor rota
-    std::vector<int> forbiddenNodes;
-    std::vector<std::pair<int, int>> forbiddenSegments;
-
-    // Proibir apenas os nos intermedios
-    for (int i = 1; i < static_cast<int>(bestRoute.size()) - 1; i++) {
-        forbiddenNodes.push_back(bestRoute[i]);
-    }
-
-    // Proibir todos os segmentos da melhor rota
-    for (int i = 0; i < static_cast<int>(bestRoute.size()) - 1; i++) {
-        forbiddenSegments.push_back({
-            bestRoute[i],
-            bestRoute[i + 1]
-        });
-    }
-
-    // Melhor rota alternativa independente
+    // 6. Calcular a rota respeitando as restrições
     graph.algorithm(
         sourceId,
-        forbiddenNodes,
-        forbiddenSegments
+        avoidNodes,
+        avoidSegments
     );
 
-    std::vector<int> alternativeRoute =
+    // 7. Reconstruir a rota
+    std::vector<int> restrictedRoute =
         graph.getPath(destinationId);
 
-    int alternativeTime = INT_MAX;
-
-    if (!alternativeRoute.empty()) {
-        alternativeTime = destination->getBestDistance();
-    }
-
+    // 8. Mostrar os dados utilizados
     std::cout << "Input:\n";
     std::cout << "Source: " << sourceId << "\n";
     std::cout << "Destination: " << destinationId << "\n";
 
+    std::cout << "AvoidNodes:";
+
+    for (std::size_t i = 0; i < avoidNodes.size(); i++) {
+        std::cout << avoidNodes[i];
+
+        if (i < avoidNodes.size() - 1) {
+            std::cout << ",";
+        }
+    }
+
+    std::cout << "\n";
+
+    std::cout << "AvoidSegments:";
+
+    for (std::size_t i = 0; i < avoidSegments.size(); i++) {
+        std::cout << "("
+                  << avoidSegments[i].first
+                  << ","
+                  << avoidSegments[i].second
+                  << ")";
+
+        if (i < avoidSegments.size() - 1) {
+            std::cout << ",";
+        }
+    }
+
+    std::cout << "\n";
+
+    // 9. Mostrar o resultado
     std::cout << "Output:\n";
+    std::cout << "Source:" << sourceId << "\n";
+    std::cout << "Destination:" << destinationId << "\n";
 
-    std::cout << "Fastest Driving Route: [";
+    if (restrictedRoute.empty()) {
+        std::cout << "RestrictedDrivingRoute:none\n";
+        return 0;
+    }
 
-    for (int i = 0; i < static_cast<int>(bestRoute.size()); i++) {
-        std::cout << bestRoute[i];
+    // O algoritmo já terminou, por isso o destino contém
+    // a distância da rota restrita
+    int restrictedTime =
+        destination->getBestDistance();
 
-        if (i < static_cast<int>(bestRoute.size()) - 1) {
-            std::cout << ", ";
+    std::cout << "RestrictedDrivingRoute:";
+
+    for (
+        std::size_t i = 0;
+        i < restrictedRoute.size();
+        i++
+    ) {
+        std::cout << restrictedRoute[i];
+
+        if (i < restrictedRoute.size() - 1) {
+            std::cout << ",";
         }
     }
 
-    std::cout << "] Time: "
-              << bestTime
-              << "\n";
-
-    if (alternativeRoute.empty()) {
-        std::cout
-            << "Best alternative independent route: none\n";
-    }
-    else {
-        std::cout
-            << "Best alternative independent route: [";
-
-        for (
-            int i = 0;
-            i < static_cast<int>(alternativeRoute.size());
-            i++
-        ) {
-            std::cout << alternativeRoute[i];
-
-            if (
-                i <
-                static_cast<int>(alternativeRoute.size()) - 1
-            ) {
-                std::cout << ", ";
-            }
-        }
-
-        std::cout << "], Time: "
-                  << alternativeTime
-                  << "\n";
-    }
+    std::cout << "("
+              << restrictedTime
+              << ")\n";
 
     return 0;
 }
