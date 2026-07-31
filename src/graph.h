@@ -24,6 +24,14 @@ public:
     const std::vector<int>& forbiddenNodes = {},
     const std::vector<std::pair<int, int>>& forbiddenSegments = {});
     std::vector<int> getPath(int destinationID) const;
+    std::vector<int> IncludeNode(
+    int sourceID,
+    int destinationID,
+    int includeNodeID,
+    int& totalTime,
+    const std::vector<int>& forbiddenNodes = {},
+    const std::vector<std::pair<int, int>>& forbiddenSegments = {}
+);
 
 };
 

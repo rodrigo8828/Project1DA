@@ -167,3 +167,51 @@ void Graph::algorithm(
     return path;
     }
 
+    std::vector<int> Graph::IncludeNode(
+        int sourceID,
+        int destinationID,
+        int includeNodeID,
+        int& totalTime,
+        const std::vector<int>& forbiddenNodes,
+        const std::vector<std::pair<int, int>>& forbiddenSegments
+    ) {
+        std::vector<int> final;
+
+        Vertex* includeNode = findVertexByID(includeNodeID);
+
+        if (includeNode == nullptr) {
+            return final;
+        }
+        for (int nodeID : forbiddenNodes) {
+        if (nodeID == includeNodeID) {
+            return final;
+        }
+        }
+    algorithm(sourceID,forbiddenNodes,forbiddenSegments);
+
+    std::vector<int> firstRoute = getPath(includeNodeID);
+
+        if (firstRoute.empty()) return final;
+
+        int firstTime = includeNode->getBestDistance();
+
+    algorithm(includeNodeID,forbiddenNodes,forbiddenSegments);
+
+    std::vector<int> secondRoute = getPath(destinationID);
+
+    if (secondRoute.empty()) return final;
+
+    Vertex* destination = findVertexByID(destinationID);
+    int secondTime = destination->getBestDistance();
+    
+    final = firstRoute;
+
+    for (std::size_t i = 1; i < secondRoute.size(); i++) {
+        final.push_back(secondRoute[i]);
+    }
+
+    totalTime = firstTime + secondTime;
+
+    return final;
+}
+    

@@ -1,77 +1,59 @@
 #include <iostream>
 #include <vector>
 #include <utility>
-#include <climits>
 
 #include "graph.h"
 #include "parser.h"
-#include "vertex.h"
 
 int main() {
-    // 1. Criar o grafo
     Graph graph;
 
-    // 2. Ler os vértices
     Parser::readLocations(
         "../For Students-20250213T135713Z-001/For Students/Locations_small.csv",
         graph
     );
 
-    // 3. Ler as arestas
     Parser::readDistances(
         "../For Students-20250213T135713Z-001/For Students/Distances_small.csv",
         graph
     );
 
-    // 4. Dados do teste
     int sourceId = 5;
     int destinationId = 4;
+    int includeNodeId = 7;
 
-    // Nó que queremos evitar
-    std::vector<int> avoidNodes = {2};
+    // Nó 2 é proibido
+    std::vector<int> avoidNodes ;
 
-    // Neste teste não evitamos segmentos
-    std::vector<std::pair<int, int>> avoidSegments = {{4,7}};
+    // Para este teste não vamos proibir segmentos,
+    // porque queremos permitir a passagem por 3 -> 7
+    std::vector<std::pair<int, int>> avoidSegments;
 
-    // 5. Verificar origem e destino
-    Vertex* source = graph.findVertexByID(sourceId);
-    Vertex* destination = graph.findVertexByID(destinationId);
+    int totalTime = 0;
 
-    if (source == nullptr) {
-        std::cout << "Vertice de origem inexistente.\n";
-        return 0;
-    }
+    std::vector<int> route =
+        graph.IncludeNode(
+            sourceId,
+            destinationId,
+            includeNodeId,
+            totalTime,
+            avoidNodes,
+            avoidSegments
+        );
 
-    if (destination == nullptr) {
-        std::cout << "Vertice de destino inexistente.\n";
-        return 0;
-    }
+    std::cout << "Source: "
+              << sourceId
+              << "\n";
 
-    // Não faz sentido evitar a origem ou o destino
-    for (int nodeId : avoidNodes) {
-        if (nodeId == sourceId || nodeId == destinationId) {
-            std::cout << "RestrictedDrivingRoute:none\n";
-            return 0;
-        }
-    }
+    std::cout << "Destination: "
+              << destinationId
+              << "\n";
 
-    // 6. Calcular a rota respeitando as restrições
-    graph.algorithm(
-        sourceId,
-        avoidNodes,
-        avoidSegments
-    );
+    std::cout << "IncludeNode: "
+              << includeNodeId
+              << "\n";
 
-    // 7. Reconstruir a rota
-    std::vector<int> restrictedRoute =
-        graph.getPath(destinationId);
-
-    // 8. Mostrar os dados utilizados
-    std::cout << "Input:\n";
-    std::cout << "Source: " << sourceId << "\n";
-    std::cout << "Destination: " << destinationId << "\n";
-
-    std::cout << "AvoidNodes:";
+    std::cout << "Nodes to exclude: ";
 
     for (std::size_t i = 0; i < avoidNodes.size(); i++) {
         std::cout << avoidNodes[i];
@@ -83,9 +65,13 @@ int main() {
 
     std::cout << "\n";
 
-    std::cout << "AvoidSegments:";
+    std::cout << "Edges to exclude: ";
 
-    for (std::size_t i = 0; i < avoidSegments.size(); i++) {
+    for (
+        std::size_t i = 0;
+        i < avoidSegments.size();
+        i++
+    ) {
         std::cout << "("
                   << avoidSegments[i].first
                   << ","
@@ -99,38 +85,24 @@ int main() {
 
     std::cout << "\n";
 
-    // 9. Mostrar o resultado
-    std::cout << "Output:\n";
-    std::cout << "Source:" << sourceId << "\n";
-    std::cout << "Destination:" << destinationId << "\n";
-
-    if (restrictedRoute.empty()) {
-        std::cout << "RestrictedDrivingRoute:none\n";
+    if (route.empty()) {
+        std::cout << "Restricted Route: none\n";
         return 0;
     }
 
-    // O algoritmo já terminou, por isso o destino contém
-    // a distância da rota restrita
-    int restrictedTime =
-        destination->getBestDistance();
+    std::cout << "Restricted Route: [";
 
-    std::cout << "RestrictedDrivingRoute:";
+    for (std::size_t i = 0; i < route.size(); i++) {
+        std::cout << route[i];
 
-    for (
-        std::size_t i = 0;
-        i < restrictedRoute.size();
-        i++
-    ) {
-        std::cout << restrictedRoute[i];
-
-        if (i < restrictedRoute.size() - 1) {
-            std::cout << ",";
+        if (i < route.size() - 1) {
+            std::cout << ", ";
         }
     }
 
-    std::cout << "("
-              << restrictedTime
-              << ")\n";
+    std::cout << "] Time: "
+              << totalTime
+              << "\n";
 
     return 0;
 }
