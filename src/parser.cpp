@@ -40,42 +40,58 @@ void Parser::readLocations(const std::string& filename, Graph& graph) {
     }
 
 }
-    void Parser::readDistances(const std::string& filename, Graph& graph){
-        std::ifstream file(filename);
-        std::string line;
-        int lineNumber = 0;
-        while (std::getline(file, line)) {
-            lineNumber++;
-            if (lineNumber == 1) {
-                continue;
-            }
-            if (line.empty()) {
-                continue;
-            }
-        
-        std::stringstream ss(line);
-        std::string location1;
-        std::string location2;
-        std::string driving;
-        std::string walking;
-        getline(ss, location1, ',');
-        getline(ss, location2, ',');
-        getline(ss, driving, ',');
-        getline(ss, walking, ',');
-
-        int driving_;
-
-        if (driving == "X") {
-            driving_ = -1;
+void Parser::readDistances(const std::string& filename, Graph& graph){
+    std::ifstream file(filename);
+    std::string line;
+    int lineNumber = 0;
+    while (std::getline(file, line)) {
+        lineNumber++;
+        if (lineNumber == 1) {
+            continue;
         }
-        else {
-            driving_ = std::stoi(driving);
+        if (line.empty()) {
+            continue;
         }
+    
+    std::stringstream ss(line);
+    std::string location1;
+    std::string location2;
+    std::string driving;
+    std::string walking;
+    getline(ss, location1, ',');
+    getline(ss, location2, ',');
+    getline(ss, driving, ',');
+    getline(ss, walking, ',');
 
-        int walking_ = std::stoi(walking);
+    int driving_;
 
-        graph.addEdge(location1, location2, driving_, walking_);
-        }
+    if (driving == "X") {
+        driving_ = -1;
     }
+    else {
+        driving_ = std::stoi(driving);
+    }
+
+    int walking_ = std::stoi(walking);
+
+    graph.addEdge(location1, location2, driving_, walking_);
+    }
+}
+
+InputData Parser::readInput(const std::string& filename) {
+    InputData data;
+
+    std::ifstream file(filename);
+
+    std::string line;
+
+    while (std::getline(file, line)) {
+        std::cout << line << "\n";
+    }
+
+    file.close();
+
+    return data;
+}
 
 
