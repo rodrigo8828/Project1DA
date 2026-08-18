@@ -84,6 +84,7 @@ InputData Parser::readInput(const std::string& filename) {
     std::ifstream file(filename);
 
     std::string line;
+
     while (std::getline(file, line)) {
         std::size_t separator = line.find(':');
 
@@ -94,9 +95,45 @@ InputData Parser::readInput(const std::string& filename) {
         std::string key = line.substr(0, separator);
         std::string value = line.substr(separator + 1);
 
-        std::cout << "key = " << key
-                << " | value = " << value
-                << "\n";
+        if (key == "Mode") {
+            data.mode = value;
+        }
+
+        if (key == "Source") {
+            data.source = std::stoi(value);
+        }
+        if (key == "Destination") {
+            data.destination = std::stoi(value);
+        }
+
+        if (key == "IncludeNode") {
+            if (!value.empty()) {
+            data.includeNode = std::stoi(value);
+        }
+        }
+        if (key == "AvoidNodes") {
+            std::stringstream ss(value);
+            std::string node;
+
+        while (std::getline(ss, node, ',')) {
+            if (!node.empty()) {
+            data.avoidNodes.push_back(std::stoi(node));
+            }
+        }
+        }
+        if (key == "AvoidSegments") {
+        std::stringstream ss(value);
+        char ch;
+        int a, b;
+
+        while (ss >> ch >> a >> ch >> b >> ch) {
+        data.avoidSegments.push_back({a, b});
+
+        if (ss.peek() == ',') {
+            ss.ignore();
+        }
+        }
+        }
     }
     file.close();
 
