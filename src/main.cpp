@@ -1,36 +1,23 @@
 #include <iostream>
+#include <fstream>
 
 #include "graph.h"
 #include "parser.h"
 
 int main() {
+    InputData data = Parser::readInput("../input.txt");
 
-    InputData data = Parser::readInput(
-        "/home/roger/universidade/Project1DA/input.txt"
-    );
+    std::ofstream output("../output.txt");
 
-std::cout << "Mode: " << data.mode << "\n";
-std::cout << "Source: " << data.source << "\n";
-std::cout << "Destination: " << data.destination << "\n";
-std::cout << "IncludeNode: " << data.includeNode << "\n";
-std::cout << "AvoidNodes: ";
+    if (!output.is_open()) {
+        std::cout << "Erro ao criar output.txt\n";
+        return 0;
+    }
 
-for (int node : data.avoidNodes) {
-    std::cout << node << " ";
-}
+    output << "Source:" << data.source << "\n";
+    output << "Destination:" << data.destination << "\n";
 
-std::cout << "\n";
+    output.close();
 
-std::cout << "AvoidSegments: ";
-
-for (auto segment : data.avoidSegments) {
-    std::cout << "("
-              << segment.first
-              << ","
-              << segment.second
-              << ") ";
-}
-
-std::cout << "\n";
     return 0;
 }
