@@ -84,11 +84,20 @@ InputData Parser::readInput(const std::string& filename) {
     std::ifstream file(filename);
 
     std::string line;
-
     while (std::getline(file, line)) {
-        std::cout << line << "\n";
-    }
+        std::size_t separator = line.find(':');
 
+        if (separator == std::string::npos) {
+            continue;
+        }
+
+        std::string key = line.substr(0, separator);
+        std::string value = line.substr(separator + 1);
+
+        std::cout << "key = " << key
+                << " | value = " << value
+                << "\n";
+    }
     file.close();
 
     return data;
