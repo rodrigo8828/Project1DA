@@ -17,6 +17,8 @@ struct InputData {
     std::vector<int> avoidNodes;
 
     std::vector<std::pair<int, int>> avoidSegments;
+
+    bool restricted = false;
 };
 
 class Parser {

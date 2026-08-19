@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <utility>
 
 #include "graph.h"
 #include "vertex.h"
@@ -29,51 +30,155 @@ int main() {
         return 0;
     }
 
-    if (data.includeNode == -1) {
+    if (
+        data.source == -1 ||
+        data.destination == -1
+    ) {
+        output.close();
+        return 0;
+    }
 
-        graph.algorithm(
-            data.source,
-            data.avoidNodes,
-            data.avoidSegments
-        );
+    Vertex* source =
+        graph.findVertexByID(data.source);
 
-        std::vector<int> route =
+    Vertex* destination =
+        graph.findVertexByID(data.destination);
+
+    if (
+        source == nullptr ||
+        destination == nullptr
+    ) {
+        output.close();
+        return 0;
+    }
+
+    if (!data.restricted) {
+
+        graph.algorithm(data.source);
+
+        std::vector<int> bestRoute =
             graph.getPath(data.destination);
 
-        if (route.empty()) {
-            output << "Restricted Route: none\n";
+        output << "Source:"
+               << data.source
+               << "\n";
+
+        output << "Destination:"
+               << data.destination
+               << "\n";
+
+        if (bestRoute.empty()) {
+
+            output << "BestDrivingRoute:none\n";
+            output << "AlternativeDrivingRoute:none\n";
         }
+
         else {
 
-            Vertex* destination =
-                graph.findVertexByID(data.destination);
+            int bestTime =
+                graph.findVertexByID(
+                    data.destination
+                )->getBestDistance();
 
-            int totalTime =
-                destination->getBestDistance();
+            std::vector<int> forbiddenNodes;
 
-            output << "Restricted Route: [";
+            for (
+                std::size_t i = 1;
+                i + 1 < bestRoute.size();
+                i++
+            ) {
+                forbiddenNodes.push_back(
+                    bestRoute[i]
+                );
+            }
 
-            for (std::size_t i = 0; i < route.size(); i++) {
+            std::vector<std::pair<int, int>>
+                forbiddenSegments;
 
-                output << route[i];
+            for (
+                std::size_t i = 0;
+                i + 1 < bestRoute.size();
+                i++
+            ) {
+                forbiddenSegments.push_back({
+                    bestRoute[i],
+                    bestRoute[i + 1]
+                });
+            }
 
-                if (i < route.size() - 1) {
-                    output << ", ";
+            graph.algorithm(
+                data.source,
+                forbiddenNodes,
+                forbiddenSegments
+            );
+
+            std::vector<int> alternativeRoute =
+                graph.getPath(data.destination);
+
+            output << "BestDrivingRoute:";
+
+            for (
+                std::size_t i = 0;
+                i < bestRoute.size();
+                i++
+            ) {
+                output << bestRoute[i];
+
+                if (i < bestRoute.size() - 1) {
+                    output << ",";
                 }
             }
 
-            output << "] Time: "
-                   << totalTime
-                   << "\n";
+            output << "("
+                   << bestTime
+                   << ")\n";
+
+            if (alternativeRoute.empty()) {
+
+                output
+                    << "AlternativeDrivingRoute:none\n";
+            }
+
+            else {
+
+                int alternativeTime =
+                    graph.findVertexByID(
+                        data.destination
+                    )->getBestDistance();
+
+                output
+                    << "AlternativeDrivingRoute:";
+
+                for (
+                    std::size_t i = 0;
+                    i < alternativeRoute.size();
+                    i++
+                ) {
+                    output << alternativeRoute[i];
+
+                    if (
+                        i <
+                        alternativeRoute.size() - 1
+                    ) {
+                        output << ",";
+                    }
+                }
+
+                output << "("
+                       << alternativeTime
+                       << ")\n";
+            }
         }
     }
 
     else {
 
+        std::vector<int> route;
         int totalTime = 0;
 
-        std::vector<int> route =
-            graph.IncludeNode(
+        if (data.includeNode != -1) {
+
+            route = graph.IncludeNode(
                 data.source,
                 data.destination,
                 data.includeNode,
@@ -81,32 +186,69 @@ int main() {
                 data.avoidNodes,
                 data.avoidSegments
             );
-
-        if (route.empty()) {
-            output << "Restricted Route: none\n";
         }
+
         else {
 
-            output << "Restricted Route: [";
+            graph.algorithm(
+                data.source,
+                data.avoidNodes,
+                data.avoidSegments
+            );
 
-            for (std::size_t i = 0; i < route.size(); i++) {
+            route =
+                graph.getPath(data.destination);
 
+            if (!route.empty()) {
+
+                totalTime =
+                    graph.findVertexByID(
+                        data.destination
+                    )->getBestDistance();
+            }
+        }
+
+        output << "Source:"
+               << data.source
+               << "\n";
+
+        output << "Destination:"
+               << data.destination
+               << "\n";
+
+        if (route.empty()) {
+
+            output
+                << "RestrictedDrivingRoute:none\n";
+        }
+
+        else {
+
+            output
+                << "RestrictedDrivingRoute:";
+
+            for (
+                std::size_t i = 0;
+                i < route.size();
+                i++
+            ) {
                 output << route[i];
 
                 if (i < route.size() - 1) {
-                    output << ", ";
+                    output << ",";
                 }
             }
 
-            output << "] Time: "
+            output << "("
                    << totalTime
-                   << "\n";
+                   << ")\n";
         }
     }
 
     output.close();
 
-    std::cout << "output.txt criado com sucesso.\n";
+    std::cout
+        << "output.txt criado com sucesso.\n";
 
     return 0;
 }

@@ -148,12 +148,17 @@ InputData Parser::readInput(const std::string& filename) {
         }
 
         else if (key == "IncludeNode") {
+
+            data.restricted = true;
+            
             if (!value.empty()) {
                 data.includeNode = std::stoi(value);
             }
         }
 
         else if (key == "AvoidNodes") {
+
+            data.restricted = true;
 
             if (!value.empty()) {
 
@@ -172,6 +177,8 @@ InputData Parser::readInput(const std::string& filename) {
         }
 
         else if (key == "AvoidSegments") {
+
+            data.restricted = true;
 
             if (!value.empty()) {
 
