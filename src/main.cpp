@@ -2,32 +2,258 @@
 #include <fstream>
 #include <vector>
 #include <utility>
+#include <string>
 
 #include "graph.h"
 #include "vertex.h"
 #include "parser.h"
 
-int main() {
 
-    Graph graph;
+void printRoute(const std::vector<int>& route) {
 
-    Parser::readLocations(
-        "../For Students-20250213T135713Z-001/For Students/Locations_small.csv",
-        graph
+    std::cout << "[";
+
+    for (std::size_t i = 0; i < route.size(); i++) {
+
+        std::cout << route[i];
+
+        if (i < route.size() - 1) {
+            std::cout << ", ";
+        }
+    }
+
+    std::cout << "]";
+}
+
+
+void bestAlternativeRoute(Graph& graph) {
+
+    int source;
+    int destination;
+
+    std::cout << "\nSource: ";
+    std::cin >> source;
+
+    std::cout << "Destination: ";
+    std::cin >> destination;
+
+    if (
+        graph.findVertexByID(source) == nullptr ||
+        graph.findVertexByID(destination) == nullptr
+    ) {
+        std::cout << "Invalid source or destination.\n";
+        return;
+    }
+
+    graph.algorithm(source);
+
+    std::vector<int> bestRoute =
+        graph.getPath(destination);
+
+    if (bestRoute.empty()) {
+
+        std::cout << "Best Driving Route: none\n";
+        std::cout << "Alternative Driving Route: none\n";
+
+        return;
+    }
+
+    int bestTime =
+        graph.findVertexByID(destination)
+        ->getBestDistance();
+
+    std::vector<int> forbiddenNodes;
+
+    for (
+        std::size_t i = 1;
+        i + 1 < bestRoute.size();
+        i++
+    ) {
+        forbiddenNodes.push_back(bestRoute[i]);
+    }
+
+    std::vector<std::pair<int, int>> forbiddenSegments;
+
+    for (
+        std::size_t i = 0;
+        i + 1 < bestRoute.size();
+        i++
+    ) {
+        forbiddenSegments.push_back({
+            bestRoute[i],
+            bestRoute[i + 1]
+        });
+    }
+
+    graph.algorithm(
+        source,
+        forbiddenNodes,
+        forbiddenSegments
     );
 
-    Parser::readDistances(
-        "../For Students-20250213T135713Z-001/For Students/Distances_small.csv",
-        graph
-    );
+    std::vector<int> alternativeRoute =
+        graph.getPath(destination);
 
-    InputData data = Parser::readInput("../input.txt");
+    std::cout << "\nBest Driving Route: ";
+    printRoute(bestRoute);
+
+    std::cout << " Time: "
+              << bestTime
+              << "\n";
+
+    if (alternativeRoute.empty()) {
+
+        std::cout
+            << "Alternative Driving Route: none\n";
+    }
+
+    else {
+
+        int alternativeTime =
+            graph.findVertexByID(destination)
+            ->getBestDistance();
+
+        std::cout
+            << "Alternative Driving Route: ";
+
+        printRoute(alternativeRoute);
+
+        std::cout << " Time: "
+                  << alternativeTime
+                  << "\n";
+    }
+}
+
+
+void restrictedRoute(Graph& graph) {
+
+    int source;
+    int destination;
+
+    std::cout << "\nSource: ";
+    std::cin >> source;
+
+    std::cout << "Destination: ";
+    std::cin >> destination;
+
+    if (
+        graph.findVertexByID(source) == nullptr ||
+        graph.findVertexByID(destination) == nullptr
+    ) {
+        std::cout << "Invalid source or destination.\n";
+        return;
+    }
+
+    std::vector<int> avoidNodes;
+    std::vector<std::pair<int, int>> avoidSegments;
+
+    int numberNodes;
+
+    std::cout << "Number of nodes to exclude: ";
+    std::cin >> numberNodes;
+
+    for (int i = 0; i < numberNodes; i++) {
+
+        int node;
+
+        std::cout << "Node "
+                  << i + 1
+                  << ": ";
+
+        std::cin >> node;
+
+        avoidNodes.push_back(node);
+    }
+
+    int numberSegments;
+
+    std::cout << "Number of segments to exclude: ";
+    std::cin >> numberSegments;
+
+    for (int i = 0; i < numberSegments; i++) {
+
+        int a;
+        int b;
+
+        std::cout << "Segment "
+                  << i + 1
+                  << " - first node: ";
+
+        std::cin >> a;
+
+        std::cout << "Segment "
+                  << i + 1
+                  << " - second node: ";
+
+        std::cin >> b;
+
+        avoidSegments.push_back({a, b});
+    }
+
+    int includeNode;
+
+    std::cout << "Include node (-1 for none): ";
+    std::cin >> includeNode;
+
+    std::vector<int> route;
+    int totalTime = 0;
+
+    if (includeNode != -1) {
+
+        route = graph.IncludeNode(
+            source,
+            destination,
+            includeNode,
+            totalTime,
+            avoidNodes,
+            avoidSegments
+        );
+    }
+
+    else {
+
+        graph.algorithm(
+            source,
+            avoidNodes,
+            avoidSegments
+        );
+
+        route = graph.getPath(destination);
+
+        if (!route.empty()) {
+
+            totalTime =
+                graph.findVertexByID(destination)
+                ->getBestDistance();
+        }
+    }
+
+    if (route.empty()) {
+
+        std::cout << "\nRestricted Route: none\n";
+        return;
+    }
+
+    std::cout << "\nRestricted Route: ";
+
+    printRoute(route);
+
+    std::cout << " Time: "
+              << totalTime
+              << "\n";
+}
+
+
+void batchMode(Graph& graph) {
+
+    InputData data =
+        Parser::readInput("../input.txt");
 
     std::ofstream output("../output.txt");
 
     if (!output.is_open()) {
         std::cout << "Erro ao criar output.txt\n";
-        return 0;
+        return;
     }
 
     if (
@@ -35,21 +261,15 @@ int main() {
         data.destination == -1
     ) {
         output.close();
-        return 0;
+        return;
     }
 
-    Vertex* source =
-        graph.findVertexByID(data.source);
-
-    Vertex* destination =
-        graph.findVertexByID(data.destination);
-
     if (
-        source == nullptr ||
-        destination == nullptr
+        graph.findVertexByID(data.source) == nullptr ||
+        graph.findVertexByID(data.destination) == nullptr
     ) {
         output.close();
-        return 0;
+        return;
     }
 
     if (!data.restricted) {
@@ -122,6 +342,7 @@ int main() {
                 i < bestRoute.size();
                 i++
             ) {
+
                 output << bestRoute[i];
 
                 if (i < bestRoute.size() - 1) {
@@ -154,6 +375,7 @@ int main() {
                     i < alternativeRoute.size();
                     i++
                 ) {
+
                     output << alternativeRoute[i];
 
                     if (
@@ -232,6 +454,7 @@ int main() {
                 i < route.size();
                 i++
             ) {
+
                 output << route[i];
 
                 if (i < route.size() - 1) {
@@ -248,7 +471,77 @@ int main() {
     output.close();
 
     std::cout
-        << "output.txt criado com sucesso.\n";
+        << "Batch mode terminado. output.txt criado.\n";
+}
+
+
+int main(int argc, char* argv[]) {
+
+    Graph graph;
+
+    Parser::readLocations(
+        "../For Students-20250213T135713Z-001/For Students/Locations_small.csv",
+        graph
+    );
+
+    Parser::readDistances(
+        "../For Students-20250213T135713Z-001/For Students/Distances_small.csv",
+        graph
+    );
+
+    if (
+        argc > 1 &&
+        std::string(argv[1]) == "batch"
+    ) {
+
+        batchMode(graph);
+
+        return 0;
+    }
+
+    int option;
+
+    do {
+
+        std::cout << "\n";
+        std::cout
+            << "====== ROUTE PLANNING TOOL ======\n";
+        std::cout << "\n";
+
+        std::cout
+            << "1 - Best and Alternative Route\n";
+
+        std::cout
+            << "2 - Restricted Route\n";
+
+        std::cout
+            << "0 - Exit\n";
+
+        std::cout << "\nOption: ";
+
+        std::cin >> option;
+
+        if (option == 1) {
+
+            bestAlternativeRoute(graph);
+        }
+
+        else if (option == 2) {
+
+            restrictedRoute(graph);
+        }
+
+        else if (option == 0) {
+
+            std::cout << "Exiting...\n";
+        }
+
+        else {
+
+            std::cout << "Invalid option.\n";
+        }
+
+    } while (option != 0);
 
     return 0;
 }
